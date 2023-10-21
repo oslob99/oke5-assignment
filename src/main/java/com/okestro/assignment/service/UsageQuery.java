@@ -23,30 +23,33 @@ public class UsageQuery {
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-        boolQuery.filter(QueryBuilders.termQuery("object_id.keyword", "host-57"));
-        boolQuery.filter(QueryBuilders.rangeQuery("@timestamp").from("now-1h").to("now"));
+
+        boolQuery.filter(QueryBuilders.termQuery("object_id.keyword", "host-" + hostId));
+        boolQuery.filter(QueryBuilders.rangeQuery("@timestamp").from("now-" + from + "h").to("now"));
 
         sourceBuilder.query(boolQuery);
         sourceBuilder.size(0);
 
-        TermsAggregationBuilder hostIdAgg = createHostIdAggregation();
+        TermsAggregationBuilder hostIdAgg = createHostIdAggregation(option , interval);
         sourceBuilder.aggregation(hostIdAgg);
         searchRequest.source(sourceBuilder);
+
+        System.out.println(searchRequest.toString());
 
         return searchRequest;
     }
 
-    public TermsAggregationBuilder createHostIdAggregation() {
+    public TermsAggregationBuilder createHostIdAggregation(String option , int interval) {
         TermsAggregationBuilder hostIdAgg = AggregationBuilders.terms("hostId")
                 .field("object_id.keyword")
                 .size(10000);
 
         DateHistogramAggregationBuilder dateHistogramAgg = AggregationBuilders.dateHistogram("interval_cpu_usage")
                 .field("@timestamp")
-                .fixedInterval(DateHistogramInterval.minutes(10))
+                .fixedInterval(DateHistogramInterval.minutes(interval))
                 .order(BucketOrder.key(true));
 
-        MaxAggregationBuilder maxCpuUsageAgg = AggregationBuilders.max("max_cpu_usage")
+        MaxAggregationBuilder maxCpuUsageAgg = AggregationBuilders.max(option + "_cpu_usage")
                 .field("basic.host.cpu.usage.norm.pct");
 
         dateHistogramAgg.subAggregation(maxCpuUsageAgg);
