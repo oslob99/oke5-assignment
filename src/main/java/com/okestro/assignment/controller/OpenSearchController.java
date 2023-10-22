@@ -3,13 +3,10 @@ package com.okestro.assignment.controller;
 import com.okestro.assignment.dto.CoreResponseDTO;
 import com.okestro.assignment.dto.NetworkResponseDTO;
 import com.okestro.assignment.dto.UsageResponseDTO;
-import com.okestro.assignment.exception.CustomException;
-import com.okestro.assignment.exception.ErrorCode;
 import com.okestro.assignment.service.OpenSearchService;
 import com.okestro.assignment.service.ValidationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,11 +23,10 @@ public class OpenSearchController {
 
 
     /**
-     *
      * @param hostId : VM 호스트 ID
      * @param option : 최대, 최소
      * @param interval : 시간 간격
-     * @param from : 지금으로 부터 몇 시간 전
+     * @param from : 지금으로 부터 몇 시간 전 (시간 단위)
      * @return : 가공된 데이터를 Response { id , [ value , time ] }
      */
     @GetMapping("/api/vm/usage/{hostId}")
@@ -40,9 +36,9 @@ public class OpenSearchController {
             @RequestParam(required = false, defaultValue = "30") int interval,
             @RequestParam(required = false, defaultValue = "1") int from
     ){
-        log.info("enter!!!! : {} , {} , {} ,{}", hostId, option, interval, from);
 
         validationService.validateHostId(hostId);
+        validationService.validateOption(option);
         validationService.validateInterval(interval);
         validationService.validateFrom(from);
 
@@ -52,8 +48,7 @@ public class OpenSearchController {
     }
 
     /**
-     *
-     * @param from : 지금으로 부터 몇 시간 전
+     * @param from : 지금으로 부터 몇 시간 전 (시간 단위)
      * @param order : 상위, 하위 ( ASC, DESC)
      * @param size : TOP N
      * @return : ID , NETWORK MB USAGE
@@ -64,7 +59,6 @@ public class OpenSearchController {
             @RequestParam(required = false, defaultValue = "desc") String order,
             @RequestParam(required = false, defaultValue = "5") int size
     ){
-        log.info("enter!!!! : {} , {} , {}",from, order, size);
 
         validationService.validateFrom(from);
         validationService.validateSort(order);
@@ -75,19 +69,18 @@ public class OpenSearchController {
         return Mono.just(networkData);
     }
 
-    @GetMapping("/api/resource/core")
+    /**
+     * @param resourceType : 자원별 타입 default-value : vsphere
+     * @param objectId : 자원별 object ID
+     * @return : RESOURCE-TYPE, SERVICE-TYPE, CORE
+     */
+    @GetMapping("/api/resource/core/{objectId}")
     public Mono<?> test(
-            @RequestParam
-                    (required = false, defaultValue = "vsphere")
-            String resourceType,
-            @RequestParam
-                    (required = false, defaultValue = "95b7fbe7-2c87-4c17-beda-7bf117516c79")
-            String objectId
+            @PathVariable String objectId,
+            @RequestParam(required = false, defaultValue = "vsphere") String resourceType
     ){
-        log.info("enter!!!! : {} , {}", resourceType, objectId);
 
         validationService.validateResourceType(resourceType);
-        validationService.validateObjectId(objectId);
 
         CoreResponseDTO coreData = openSearchService.getCoreData(resourceType, objectId);
 

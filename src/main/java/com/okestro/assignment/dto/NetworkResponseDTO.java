@@ -9,15 +9,15 @@ import java.util.List;
 @Builder
 public class NetworkResponseDTO {
 
-    private List<NetworkUsageData> networkUsageDataList;
+    private List<NetworkUsageData> result;
 
     @Getter
     @Builder
     public static class NetworkUsageData {
         private String id;
-        private double inMBytes;
-        private double totalMBytes;
-        private double outMBytes;
+        private double inMB;
+        private double totalMB;
+        private double outMB;
     }
 
 }

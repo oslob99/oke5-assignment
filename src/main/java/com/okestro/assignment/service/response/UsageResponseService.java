@@ -9,7 +9,6 @@ import org.opensearch.action.search.SearchResponse;
 import org.springframework.stereotype.Service;
 
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;

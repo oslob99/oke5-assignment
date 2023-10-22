@@ -16,7 +16,6 @@ public class NetworkQuery {
         SearchRequest searchRequest = new SearchRequest("sym-metric-k8s-node");
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
-        // Bool 쿼리 생성
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
         boolQuery.filter(QueryBuilders.rangeQuery("@timestamp")
                 .from("now-" + from + "h")
@@ -24,17 +23,14 @@ public class NetworkQuery {
 
         sourceBuilder.query(boolQuery);
 
-        // "basic.k8s.node.network.usage.out_bytes" 필드로 정렬
         if (order.equals("asc")){
             sourceBuilder.sort("basic.k8s.node.network.usage.total_bytes", SortOrder.ASC);
         }else {
             sourceBuilder.sort("basic.k8s.node.network.usage.total_bytes", SortOrder.DESC);
         }
 
-        // 결과 크기 설정
         sourceBuilder.size(size);
 
-        // "_source" 필드 설정
         sourceBuilder.fetchSource(new String[] {"basic.k8s.node.network.usage"}, null);
 
         searchRequest.source(sourceBuilder);

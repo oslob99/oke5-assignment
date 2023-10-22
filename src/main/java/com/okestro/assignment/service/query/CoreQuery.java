@@ -17,20 +17,17 @@ public class CoreQuery {
         SearchRequest searchRequest = new SearchRequest("sym-metric-vmware-"+resourceType);
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
 
-        // Query 생성
         MatchQueryBuilder matchQuery = QueryBuilders.matchQuery("object_id.keyword", objectId);
         sourceBuilder.query(matchQuery);
 
-        // "_source" 필드 설정
-        sourceBuilder.fetchSource(new String[]{"basic.vsphere.cpu.cores","service.adapter","service.type"}, null);
+        if (resourceType.equals("vm")) resourceType = "system";
 
-        // 결과 크기 설정
+        sourceBuilder.fetchSource(new String[]{"basic." + resourceType + ".cpu.cores","service.adapter","service.type"}, null);
+
         sourceBuilder.size(1);
 
-        // 실행 순서 설정
         sourceBuilder.sort(SortBuilders.scoreSort());
 
-        // SearchRequest에 SearchSourceBuilder 설정
         searchRequest.source(sourceBuilder);
 
         return searchRequest;
