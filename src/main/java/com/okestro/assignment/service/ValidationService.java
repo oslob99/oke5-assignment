@@ -37,5 +37,26 @@ public class ValidationService {
         }
     }
 
+    private boolean isValidResourceType(String resourceType) {
+        String[] validTypes = {"vsphere", "vcenter", "cluster", "host", "vm"};
+        for (String validType : validTypes) {
+            if (validType.equals(resourceType)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void validateResourceType(String resourceType){
+        if (!isValidResourceType(resourceType)){
+            throw new CustomException(ErrorCode.INVALID_RESOURCETYPE_VALUE);
+        }
+    }
+
+    public void validateObjectId(String objectId){
+        if (objectId.isEmpty()){
+            throw new CustomException(ErrorCode.INVALID_OBJECTID_VALUE);
+        }
+    }
 
 }

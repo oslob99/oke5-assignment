@@ -37,8 +37,6 @@ public class UsageQuery {
         sourceBuilder.aggregation(hostIdAgg);
         searchRequest.source(sourceBuilder);
 
-        System.out.println(searchRequest.toString());
-
         return searchRequest;
     }
 

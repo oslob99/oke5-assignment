@@ -1,5 +1,6 @@
 package com.okestro.assignment.controller;
 
+import com.okestro.assignment.dto.CoreResponseDTO;
 import com.okestro.assignment.dto.NetworkResponseDTO;
 import com.okestro.assignment.dto.UsageResponseDTO;
 import com.okestro.assignment.exception.CustomException;
@@ -74,18 +75,23 @@ public class OpenSearchController {
         return Mono.just(networkData);
     }
 
-    @GetMapping("/api/cpu/core")
+    @GetMapping("/api/resource/core")
     public Mono<?> test(
-            @RequestParam String resourceType,
-            @RequestParam int objectId
+            @RequestParam
+                    (required = false, defaultValue = "vsphere")
+            String resourceType,
+            @RequestParam
+                    (required = false, defaultValue = "95b7fbe7-2c87-4c17-beda-7bf117516c79")
+            String objectId
     ){
         log.info("enter!!!! : {} , {}", resourceType, objectId);
 
+        validationService.validateResourceType(resourceType);
+        validationService.validateObjectId(objectId);
 
-//        UsageResponseDTO responseData = openSearchService.getData(hostId, option, interval, from);
+        CoreResponseDTO coreData = openSearchService.getCoreData(resourceType, objectId);
 
-        return Mono.just("haha");
-//                Mono.just(responseData);
+        return Mono.just(coreData);
     }
 
 

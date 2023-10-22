@@ -2,12 +2,15 @@ package com.okestro.assignment.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.okestro.assignment.dto.CoreResponseDTO;
 import com.okestro.assignment.dto.NetworkResponseDTO;
 import com.okestro.assignment.dto.UsageResponseDTO;
 import com.okestro.assignment.exception.CustomException;
 import com.okestro.assignment.exception.ErrorCode;
+import com.okestro.assignment.service.query.CoreQuery;
 import com.okestro.assignment.service.query.NetworkQuery;
 import com.okestro.assignment.service.query.UsageQuery;
+import com.okestro.assignment.service.response.CoreResponseService;
 import com.okestro.assignment.service.response.NetworkResponseService;
 import com.okestro.assignment.service.response.UsageResponseService;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +20,8 @@ import org.opensearch.action.search.SearchResponse;
 import org.opensearch.client.RequestOptions;
 import org.opensearch.client.RestHighLevelClient;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
 
 @Service
 @Slf4j
@@ -30,6 +35,8 @@ public class OpenSearchService {
     private final UsageResponseService usageResponseService;
     private final NetworkQuery networkQuery;
     private final NetworkResponseService networkResponseService;
+    private final CoreQuery coreQuery;
+    private final CoreResponseService coreResponseService;
 
 
     /**
@@ -90,4 +97,21 @@ public class OpenSearchService {
     }
 
 
+    public CoreResponseDTO getCoreData(String resourceType, String objectId) {
+
+        try {
+            SearchRequest searchRequest = coreQuery.createOpenSearchRequest(resourceType, objectId);
+            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+
+            CoreResponseDTO coreResponseDTO = coreResponseService.extractIndexIdCoreFromJsonResponse(response);
+
+            String jsonResponse = mapper.writeValueAsString(coreResponseDTO);
+            System.out.println(jsonResponse);
+
+            return coreResponseDTO;
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
