@@ -24,4 +24,18 @@ public class ValidationService {
             throw new CustomException(ErrorCode.INVALID_FROM_VALUE);
         }
     }
+
+    public void validateSize(int size) {
+        if (size < 1 || size > 10) {
+            throw new CustomException(ErrorCode.INVALID_SIZE_VALUE);
+        }
+    }
+
+    public void validateSort(String sort) {
+        if (!"asc".equalsIgnoreCase(sort) && !"desc".equalsIgnoreCase(sort)) {
+            throw new CustomException(ErrorCode.INVALID_SORT_VALUE);
+        }
+    }
+
+
 }

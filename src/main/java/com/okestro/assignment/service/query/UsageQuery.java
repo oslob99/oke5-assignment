@@ -1,5 +1,7 @@
-package com.okestro.assignment.service;
+package com.okestro.assignment.service.query;
 
+import com.okestro.assignment.exception.CustomException;
+import com.okestro.assignment.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.opensearch.action.search.SearchRequest;
 import org.opensearch.index.query.BoolQueryBuilder;
@@ -10,6 +12,7 @@ import org.opensearch.search.aggregations.bucket.histogram.DateHistogramAggregat
 import org.opensearch.search.aggregations.bucket.histogram.DateHistogramInterval;
 import org.opensearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.opensearch.search.aggregations.metrics.MaxAggregationBuilder;
+import org.opensearch.search.aggregations.metrics.MinAggregationBuilder;
 import org.opensearch.search.builder.SearchSourceBuilder;
 import org.springframework.stereotype.Service;
 
@@ -39,7 +42,7 @@ public class UsageQuery {
         return searchRequest;
     }
 
-    public TermsAggregationBuilder createHostIdAggregation(String option , int interval) {
+    public TermsAggregationBuilder createHostIdAggregation(String option, int interval) {
         TermsAggregationBuilder hostIdAgg = AggregationBuilders.terms("hostId")
                 .field("object_id.keyword")
                 .size(10000);
@@ -49,12 +52,28 @@ public class UsageQuery {
                 .fixedInterval(DateHistogramInterval.minutes(interval))
                 .order(BucketOrder.key(true));
 
-        MaxAggregationBuilder maxCpuUsageAgg = AggregationBuilders.max(option + "_cpu_usage")
-                .field("basic.host.cpu.usage.norm.pct");
-
-        dateHistogramAgg.subAggregation(maxCpuUsageAgg);
+        if ("min".equals(option)) {
+            addMinCpuUsageAggregation(dateHistogramAgg);
+        } else if ("max".equals(option)) {
+            addMaxCpuUsageAggregation(dateHistogramAgg);
+        } else {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
+        }
         hostIdAgg.subAggregation(dateHistogramAgg);
 
         return hostIdAgg;
     }
+
+    private void addMinCpuUsageAggregation(DateHistogramAggregationBuilder dateHistogramAgg) {
+        MinAggregationBuilder minCpuUsageAgg = AggregationBuilders.min("min_cpu_usage")
+                .field("basic.host.cpu.usage.norm.pct");
+        dateHistogramAgg.subAggregation(minCpuUsageAgg);
+    }
+
+    private void addMaxCpuUsageAggregation(DateHistogramAggregationBuilder dateHistogramAgg) {
+        MaxAggregationBuilder maxCpuUsageAgg = AggregationBuilders.max("max_cpu_usage")
+                .field("basic.host.cpu.usage.norm.pct");
+        dateHistogramAgg.subAggregation(maxCpuUsageAgg);
+    }
+
 }

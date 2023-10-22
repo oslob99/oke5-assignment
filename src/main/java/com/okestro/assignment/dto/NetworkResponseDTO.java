@@ -15,9 +15,9 @@ public class NetworkResponseDTO {
     @Builder
     public static class NetworkUsageData {
         private String id;
-        private double inBytes;
-        private double totalBytes;
-        private double outBytes;
+        private double inMBytes;
+        private double totalMBytes;
+        private double outMBytes;
     }
 
 }

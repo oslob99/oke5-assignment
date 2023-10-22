@@ -11,15 +11,15 @@ import java.util.List;
 @Builder
 public class UsageResponseDTO {
 
+    private String status;
+    private String message;
     private String hostId;
     private List<ValueTimeDTO> result;
 
     @Getter
     @Builder
-    public static class ValueTimeDTO{
-        private String Timestamp;
+    public static class ValueTimeDTO {
+        private String timestamp;
         private double Value;
-
     }
-
 }
